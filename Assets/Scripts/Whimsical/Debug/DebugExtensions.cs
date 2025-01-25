@@ -6,7 +6,7 @@ namespace Whimsical.Debug
 
     public static class DebugExtensions
     {
-        private const string Template = "[{0}][{1}] ({2}) => {3}";
+        private const string Template = "[{0}][{1}] ({2}): {3}";
 
         public static void Log(string message, [CallerFilePath] string filePath = "",
                                [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)

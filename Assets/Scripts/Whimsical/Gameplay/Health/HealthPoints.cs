@@ -41,7 +41,7 @@ namespace Whimsical.Gameplay.Health
 
             if (previousHealth > 0 && CurrentHealth <= 0)
             {
-                _onDeathAction.Invoke();
+                _onDeathAction?.Invoke();
             }
         }
 
