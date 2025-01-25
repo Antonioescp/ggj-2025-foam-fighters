@@ -7,5 +7,8 @@ namespace Whimsical.Gameplay.Health
     {
         [field: SerializeField]
         public int BaseMaxHealth { get; set; }
+        
+        [field: SerializeField]
+        public float MovementSpeed { get; set; }
     }
 }

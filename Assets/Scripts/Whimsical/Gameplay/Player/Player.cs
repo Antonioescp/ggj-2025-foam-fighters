@@ -7,6 +7,7 @@ namespace Whimsical.Gameplay.Player
     using Debug;
     using UnityEngine.InputSystem;
 
+    [RequireComponent(typeof(Rigidbody2D))]
     public class Player : MonoBehaviour
     {
         [SerializeField]
@@ -19,10 +20,15 @@ namespace Whimsical.Gameplay.Player
         private const string MoveAction = "Move";
         private InputAction _moveAction;
 
+        private Rigidbody2D _rb;
+
         private void Start()
         {
             // Instantiating stuff
             _healthPoints = new HealthPoints(_stats.BaseMaxHealth);
+            
+            // Getting stuff
+            _rb = this.GetComponent<Rigidbody2D>();
             
             // Initializing input
             _jumpAction = InputSystem.actions.FindAction(JumpAction);
@@ -31,13 +37,10 @@ namespace Whimsical.Gameplay.Player
             DebugExtensions.Log($"My health is {_healthPoints.CurrentHealth}");
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
-            var movement = _moveAction.ReadValue<Vector2>();
-            if (_jumpAction.IsPressed())
-            {
-                DebugExtensions.Log("I'm trying to jump");
-            }
+            var movement = _moveAction.ReadValue<Vector2>().normalized.x;
+            _rb.linearVelocityX = movement * _stats.MovementSpeed;
         }
     }
 }
