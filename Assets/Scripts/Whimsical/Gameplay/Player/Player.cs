@@ -6,6 +6,7 @@ namespace Whimsical.Gameplay.Player
     using System;
     using Debug;
     using UnityEngine.InputSystem;
+    using Debug = UnityEngine.Debug;
 
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(PlayerInput))]
@@ -15,7 +16,8 @@ namespace Whimsical.Gameplay.Player
         private CharacterStats _stats;
         private HealthPoints _healthPoints;
 
-        private Rigidbody2D _rb;
+        private Rigidbody2D _rigidBody;
+        private SpriteRenderer _spriteRenderer;
         
         private PlayerInput _input;
         private const string JumpAction = "Jump";
@@ -24,6 +26,29 @@ namespace Whimsical.Gameplay.Player
         private const string MoveAction = "Move";
         private InputAction _moveAction;
 
+        private bool IsGrounded
+        {
+            get
+            {
+                var spriteCenter = new Vector2(_spriteRenderer.transform.position.x, _spriteRenderer.transform.position.y);
+                var hit = Physics2D.BoxCast(spriteCenter, _spriteRenderer.size / 2, 0, Vector2.down);
+
+                if (!hit)
+                    return false;
+                
+                DebugExtensions.Log($"Hit against {hit.collider.gameObject.name}");
+                
+                
+                var spriteBottomCenter = new Vector2(_spriteRenderer.transform.position.x, _spriteRenderer.bounds.min.y);
+
+                var minDistanceToJump = _stats.JumpingDistance + (spriteCenter - spriteBottomCenter).magnitude;
+                
+                DebugExtensions.Log($"The distance to jump is {minDistanceToJump}");
+                DebugExtensions.Log($"The distance is {hit.distance}");
+                return hit.distance <= minDistanceToJump;
+            }
+        }
+
         private void Start()
         {
             // Instantiating stuff
@@ -31,8 +56,9 @@ namespace Whimsical.Gameplay.Player
             DebugExtensions.Log($"My health is {_healthPoints.CurrentHealth}");
             
             // Getting stuff
-            _rb = this.GetComponent<Rigidbody2D>();
+            _rigidBody = this.GetComponent<Rigidbody2D>();
             _input = this.GetComponent<PlayerInput>();
+            _spriteRenderer = this.GetComponent<SpriteRenderer>();
             
             // Initializing input
             _jumpAction = _input.actions.FindAction(JumpAction);
@@ -44,7 +70,17 @@ namespace Whimsical.Gameplay.Player
         private void FixedUpdate()
         {
             var movement = _moveAction.ReadValue<float>();
-            _rb.linearVelocityX = movement * _stats.MovementSpeed;
+            _rigidBody.linearVelocityX = movement * _stats.MovementSpeed;
+
+            if (_jumpAction.WasPressedThisFrame() && IsGrounded)
+            {
+                this.Jump();
+            }
+        }
+
+        private void Jump()
+        {
+            _rigidBody.AddForce(_stats.JumpForce * Vector2.up, ForceMode2D.Impulse);
         }
     }
 }
