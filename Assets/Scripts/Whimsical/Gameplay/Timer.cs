@@ -14,6 +14,8 @@ namespace Whimsical.Gameplay
             remove => _finishedAction -= value;
         }
 
+        public bool UseUnscaledDeltaTime { get; set; } = true;
+
         public float TargetTime
         {
             get => targetTime;
@@ -35,7 +37,9 @@ namespace Whimsical.Gameplay
         {
             if (IsFinished || !IsStarted) return;
 
-            ElapsedTime += Time.deltaTime;
+            ElapsedTime += UseUnscaledDeltaTime
+                ? Time.unscaledDeltaTime
+                : Time.deltaTime;
             
             if (ElapsedTime < targetTime) return;
             IsFinished = true;

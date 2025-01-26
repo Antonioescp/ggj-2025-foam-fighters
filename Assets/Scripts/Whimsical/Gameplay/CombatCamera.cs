@@ -23,12 +23,10 @@ namespace Whimsical.Gameplay
         public void Start()
         {
             _cam = this.GetComponent<Camera>();
-
             _maxRightOffset = new Vector2(1 - _offset.x, 1 - _offset.y);
-            DebugExtensions.Log($"Using offsets: {_offset} and max offsets: {_maxRightOffset}");
         }
 
-        public void Update()
+        public void LateUpdate()
         {
             var screenPositions = _targets.Select(target =>
             {
@@ -52,8 +50,6 @@ namespace Whimsical.Gameplay
                 .Aggregate((accumulator, current) => accumulator + current);
             centroid /= _targets.Count;
 
-            DebugExtensions.Log($"centroid is: {centroid}");
-
             var targetCameraPosition = Vector2.SmoothDamp(
                 _cam.transform.position,
                 centroid,
@@ -65,7 +61,7 @@ namespace Whimsical.Gameplay
                 targetCameraPosition.y,
                 _cam.transform.position.z);
 
-            const float speed = 0.01f;
+            var speed = 1f * Time.deltaTime;
             var multiplier = shouldZoomIn ? 1 : -1;
             _cam.orthographicSize += multiplier * speed;
             _cam.orthographicSize = Math.Clamp(_cam.orthographicSize, _minProjectionSize, _maxProjectionSize);

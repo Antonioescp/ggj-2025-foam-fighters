@@ -6,7 +6,6 @@ namespace Whimsical.Gameplay.Player
     using System;
     using Debug;
     using UnityEngine.InputSystem;
-    using Debug = UnityEngine.Debug;
 
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(PlayerInput))]
@@ -26,22 +25,24 @@ namespace Whimsical.Gameplay.Player
         private InputAction _moveInput;
         private const string AttackInput = "Attack";
         private InputAction _attackInput;
+        private const string ParryInput = "Parry";
+        private InputAction _parryInput;
         
         [SerializeField]
         private GameObject _attackHitBox;
         private BoxCollider2D _attackHitBoxCollider;
         private Timer _attackDurationTimer;
         private Timer _attackCooldownTimer;
-        private bool CanAttack => !_attackDurationTimer.IsRunning && !_attackCooldownTimer.IsRunning;
+        private bool CanAttack => !_attackDurationTimer.IsRunning
+                                  && !_attackCooldownTimer.IsRunning
+                                  && !_parryDurationTimer.IsRunning;
         private bool IsAttacking => _attackDurationTimer.IsRunning;
         private bool IsLookingRight => !_spriteRenderer.flipX;
-        
-        private Action<Vector2> _attackHitAction;
-        public event Action<Vector2> OnAttackHit
-        {
-            add => _attackHitAction += value;
-            remove => _attackHitAction -= value;
-        }
+
+        private Timer _parryDurationTimer;
+        private Timer _parryCooldownTimer;
+        private bool IsParrying => _parryDurationTimer.IsRunning;
+        private bool CanParry => !IsParrying && !IsAttacking && !_parryCooldownTimer.IsRunning;
 
         private bool IsGrounded
         {
@@ -59,11 +60,38 @@ namespace Whimsical.Gameplay.Player
                 return hit.distance <= minDistanceToJump;
             }
         }
+        
+        private Action<Vector2> _attackHitAction;
+        public event Action<Vector2> OnAttackHit
+        {
+            add => _attackHitAction += value;
+            remove => _attackHitAction -= value;
+        }
+        
+        public event Action OnDeath
+        {
+            add => _healthPoints.OnDeath += value;
+            remove => _healthPoints.OnDeath -= value;
+        }
+
+        private Action _parryAction;
+        public event Action OnParry
+        {
+            add => _parryAction += value;
+            remove => _parryAction -= value;
+        }
+
+        private Color _parryColor = Color.black;
+        private Color _currentColor;
+
+        private void Awake()
+        {
+            _healthPoints = new HealthPoints(_stats.BaseMaxHealth);
+        }
 
         private void Start()
         {
             // Instantiating stuff
-            _healthPoints = new HealthPoints(_stats.BaseMaxHealth);
             DebugExtensions.Log($"My health is {_healthPoints.CurrentHealth}");
             
             // Getting stuff
@@ -76,6 +104,7 @@ namespace Whimsical.Gameplay.Player
             _jumpInput = _input.actions.FindAction(JumpInput);
             _moveInput = _input.actions.FindAction(MoveInput);
             _attackInput = _input.actions.FindAction(AttackInput);
+            _parryInput = _input.actions.FindAction(ParryInput);
 
             // Setting timers
             _attackDurationTimer = gameObject.AddComponent<Timer>();
@@ -90,6 +119,18 @@ namespace Whimsical.Gameplay.Player
             _attackCooldownTimer = gameObject.AddComponent<Timer>();
             _attackCooldownTimer.TargetTime = _stats.AttackCooldown;
             _attackCooldownTimer.OnTimeElapsed += () => DebugExtensions.Log($"You can attack again");
+
+            _currentColor = _spriteRenderer.color;
+            _parryDurationTimer = gameObject.AddComponent<Timer>();
+            _parryDurationTimer.TargetTime = _stats.ParryDuration;
+            _parryDurationTimer.OnTimeElapsed += () =>
+            {
+                _parryCooldownTimer.RestartTimer();
+                _spriteRenderer.color = _currentColor;
+            };
+            
+            _parryCooldownTimer = gameObject.AddComponent<Timer>();
+            _parryCooldownTimer.TargetTime = _stats.ParryCooldown;
             
             // Making sure all players can use the same keyboard
             _input.SwitchCurrentControlScheme(_input.defaultControlScheme, Keyboard.current);
@@ -122,6 +163,9 @@ namespace Whimsical.Gameplay.Player
 
             if (_attackInput.WasPressedThisFrame())
                 this.Attack();
+            
+            if (_parryInput.WasPressedThisFrame())
+                this.Parry();
         }
 
         private void Jump()
@@ -137,6 +181,14 @@ namespace Whimsical.Gameplay.Player
             this._attackDurationTimer.RestartTimer();
         }
 
+        private void Parry()
+        {
+            if (!this.CanParry) return;
+            DebugExtensions.Log("Parrying");
+            _parryDurationTimer.RestartTimer();
+            _spriteRenderer.color = _parryColor;
+        }
+
         private void OnTriggerEnter2D(Collider2D other)
         {
             var damageable = other.gameObject.GetComponent<IDamageable>();
@@ -149,6 +201,13 @@ namespace Whimsical.Gameplay.Player
 
         public void ReceiveDamage(int damage)
         {
+            if (_parryDurationTimer.IsRunning)
+            {
+                _parryAction?.Invoke();
+                return;
+            }
+                
+            
             this._healthPoints.ReceiveDamage(damage);
         }
     }

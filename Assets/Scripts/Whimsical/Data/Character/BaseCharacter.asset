@@ -18,3 +18,5 @@ MonoBehaviour:
   <JumpingDistance>k__BackingField: 0.02
   <AttackDuration>k__BackingField: 0.7
   <AttackCooldown>k__BackingField: 0.5
+  <ParryDuration>k__BackingField: 1
+  <ParryCooldown>k__BackingField: 0.01
