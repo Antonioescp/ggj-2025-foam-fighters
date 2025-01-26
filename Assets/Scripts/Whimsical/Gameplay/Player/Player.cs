@@ -35,6 +35,13 @@ namespace Whimsical.Gameplay.Player
         private bool CanAttack => !_attackDurationTimer.IsRunning && !_attackCooldownTimer.IsRunning;
         private bool IsAttacking => _attackDurationTimer.IsRunning;
         private bool IsLookingRight => !_spriteRenderer.flipX;
+        
+        private Action<Vector2> _attackHitAction;
+        public event Action<Vector2> OnAttackHit
+        {
+            add => _attackHitAction += value;
+            remove => _attackHitAction -= value;
+        }
 
         private bool IsGrounded
         {
@@ -133,7 +140,11 @@ namespace Whimsical.Gameplay.Player
         private void OnTriggerEnter2D(Collider2D other)
         {
             var damageable = other.gameObject.GetComponent<IDamageable>();
-            damageable?.ReceiveDamage(1);
+            if (damageable is null)
+                return;
+            
+            _attackHitAction?.Invoke(this._attackHitBoxCollider.transform.position);
+            damageable.ReceiveDamage(1);
         }
 
         public void ReceiveDamage(int damage)
