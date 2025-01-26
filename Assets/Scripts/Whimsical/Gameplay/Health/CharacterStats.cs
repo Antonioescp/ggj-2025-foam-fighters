@@ -16,5 +16,11 @@ namespace Whimsical.Gameplay.Health
         
         [field: SerializeField]
         public float JumpingDistance { get; set; }
+        
+        [field: SerializeField]
+        public float AttackDuration { get; set; }
+        
+        [field: SerializeField]
+        public float AttackCooldown { get; set; }
     }
 }

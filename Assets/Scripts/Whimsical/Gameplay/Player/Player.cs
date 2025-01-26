@@ -3,12 +3,14 @@ using Whimsical.Gameplay.Health;
 
 namespace Whimsical.Gameplay.Player
 {
+    using System;
     using Debug;
     using UnityEngine.InputSystem;
+    using Debug = UnityEngine.Debug;
 
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(PlayerInput))]
-    public class Player : MonoBehaviour
+    public class Player : MonoBehaviour, IDamageable
     {
         [SerializeField]
         private CharacterStats _stats;
@@ -18,11 +20,21 @@ namespace Whimsical.Gameplay.Player
         private SpriteRenderer _spriteRenderer;
         
         private PlayerInput _input;
-        private const string JumpAction = "Jump";
-        private InputAction _jumpAction;
-
-        private const string MoveAction = "Move";
-        private InputAction _moveAction;
+        private const string JumpInput = "Jump";
+        private InputAction _jumpInput;
+        private const string MoveInput = "Move";
+        private InputAction _moveInput;
+        private const string AttackInput = "Attack";
+        private InputAction _attackInput;
+        
+        [SerializeField]
+        private GameObject _attackHitBox;
+        private BoxCollider2D _attackHitBoxCollider;
+        private Timer _attackDurationTimer;
+        private Timer _attackCooldownTimer;
+        private bool CanAttack => !_attackDurationTimer.IsRunning && !_attackCooldownTimer.IsRunning;
+        private bool IsAttacking => _attackDurationTimer.IsRunning;
+        private bool IsLookingRight => !_spriteRenderer.flipX;
 
         private bool IsGrounded
         {
@@ -34,14 +46,9 @@ namespace Whimsical.Gameplay.Player
                 if (!hit)
                     return false;
                 
-                DebugExtensions.Log($"Hit against {hit.collider.gameObject.name}");
-                
                 var spriteBottomCenter = new Vector2(_spriteRenderer.transform.position.x, _spriteRenderer.bounds.min.y);
 
                 var minDistanceToJump = _stats.JumpingDistance + (spriteCenter - spriteBottomCenter).magnitude;
-                
-                DebugExtensions.Log($"The distance to jump is {minDistanceToJump}");
-                DebugExtensions.Log($"The distance is {hit.distance}");
                 return hit.distance <= minDistanceToJump;
             }
         }
@@ -56,29 +63,82 @@ namespace Whimsical.Gameplay.Player
             _rigidBody = this.GetComponent<Rigidbody2D>();
             _input = this.GetComponent<PlayerInput>();
             _spriteRenderer = this.GetComponent<SpriteRenderer>();
+            _attackHitBoxCollider = _attackHitBox.GetComponent<BoxCollider2D>();
             
             // Initializing input
-            _jumpAction = _input.actions.FindAction(JumpAction);
-            _moveAction = _input.actions.FindAction(MoveAction);
+            _jumpInput = _input.actions.FindAction(JumpInput);
+            _moveInput = _input.actions.FindAction(MoveInput);
+            _attackInput = _input.actions.FindAction(AttackInput);
+
+            // Setting timers
+            _attackDurationTimer = gameObject.AddComponent<Timer>();
+            _attackDurationTimer.TargetTime = _stats.AttackDuration;
+            _attackDurationTimer.OnTimeElapsed += () =>
+            {
+                DebugExtensions.Log("Attack duration finished");
+                _attackHitBoxCollider.enabled = false;
+                _attackCooldownTimer.RestartTimer();
+            };
+
+            _attackCooldownTimer = gameObject.AddComponent<Timer>();
+            _attackCooldownTimer.TargetTime = _stats.AttackCooldown;
+            _attackCooldownTimer.OnTimeElapsed += () => DebugExtensions.Log($"You can attack again");
             
-            // Making sure both players can use the same keyboard
+            // Making sure all players can use the same keyboard
             _input.SwitchCurrentControlScheme(_input.defaultControlScheme, Keyboard.current);
+
+            _healthPoints.OnDeath += () => DebugExtensions.Log($"{this.name} died :(");
+        }
+
+        private void Update()
+        {
+            if (IsLookingRight && _attackHitBoxCollider.offset.x < 0
+                || !IsLookingRight && _attackHitBoxCollider.offset.x > 0)
+            {
+                var offset = _attackHitBoxCollider.offset;
+                offset.x *= -1;
+                _attackHitBoxCollider.offset = offset;
+            }
         }
 
         private void FixedUpdate()
         {
-            var movement = _moveAction.ReadValue<float>();
+            var movement = _moveInput.ReadValue<float>();
             _rigidBody.linearVelocityX = movement * _stats.MovementSpeed;
+            
+            var isMoving = movement != 0.0f;
+            if (isMoving && !IsAttacking)
+                _spriteRenderer.flipX = movement < 0;
 
-            if (_jumpAction.WasPressedThisFrame() && IsGrounded)
-            {
+            if (_jumpInput.WasPressedThisFrame() && IsGrounded)
                 this.Jump();
-            }
+
+            if (_attackInput.WasPressedThisFrame())
+                this.Attack();
         }
 
         private void Jump()
         {
             _rigidBody.AddForce(_stats.JumpForce * Vector2.up, ForceMode2D.Impulse);
+        }
+
+        private void Attack()
+        {
+            if (!this.CanAttack) return;
+            DebugExtensions.Log("Attacking");
+            _attackHitBoxCollider.enabled = true;
+            this._attackDurationTimer.RestartTimer();
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            var damageable = other.gameObject.GetComponent<IDamageable>();
+            damageable?.ReceiveDamage(1);
+        }
+
+        public void ReceiveDamage(int damage)
+        {
+            this._healthPoints.ReceiveDamage(damage);
         }
     }
 }
