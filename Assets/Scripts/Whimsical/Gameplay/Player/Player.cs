@@ -3,10 +3,8 @@ using Whimsical.Gameplay.Health;
 
 namespace Whimsical.Gameplay.Player
 {
-    using System;
     using Debug;
     using UnityEngine.InputSystem;
-    using Debug = UnityEngine.Debug;
 
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(PlayerInput))]
@@ -38,7 +36,6 @@ namespace Whimsical.Gameplay.Player
                 
                 DebugExtensions.Log($"Hit against {hit.collider.gameObject.name}");
                 
-                
                 var spriteBottomCenter = new Vector2(_spriteRenderer.transform.position.x, _spriteRenderer.bounds.min.y);
 
                 var minDistanceToJump = _stats.JumpingDistance + (spriteCenter - spriteBottomCenter).magnitude;
@@ -64,6 +61,7 @@ namespace Whimsical.Gameplay.Player
             _jumpAction = _input.actions.FindAction(JumpAction);
             _moveAction = _input.actions.FindAction(MoveAction);
             
+            // Making sure both players can use the same keyboard
             _input.SwitchCurrentControlScheme(_input.defaultControlScheme, Keyboard.current);
         }
 
