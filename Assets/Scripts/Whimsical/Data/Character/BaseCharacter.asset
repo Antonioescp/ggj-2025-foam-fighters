@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <BaseMaxHealth>k__BackingField: 1
   <MovementSpeed>k__BackingField: 7
-  <JumpForce>k__BackingField: 650
+  <JumpForce>k__BackingField: 700
   <JumpingDistance>k__BackingField: 0.02
   <AttackDuration>k__BackingField: 0.7
   <AttackCooldown>k__BackingField: 0.5

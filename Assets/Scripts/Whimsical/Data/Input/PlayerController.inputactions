@@ -46,7 +46,7 @@
                 {
                     "name": "",
                     "id": "ff76b1af-f17e-460e-951d-9b296c3c0553",
-                    "path": "<Keyboard>/x",
+                    "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Player1",
@@ -57,7 +57,7 @@
                 {
                     "name": "",
                     "id": "7ac0cc2a-5bbb-44f4-b5a0-fa1700a4c047",
-                    "path": "<Keyboard>/i",
+                    "path": "<Keyboard>/upArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Player2",
@@ -68,7 +68,7 @@
                 {
                     "name": "",
                     "id": "0b449789-03f4-46b1-b90b-d9c9183fb68a",
-                    "path": "<Keyboard>/c",
+                    "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Player1",
@@ -79,7 +79,7 @@
                 {
                     "name": "",
                     "id": "374b353b-b534-404d-862e-457817d508b4",
-                    "path": "<Keyboard>/o",
+                    "path": "<Keyboard>/rightCtrl",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Player2",
@@ -90,7 +90,7 @@
                 {
                     "name": "",
                     "id": "c45b63d2-d484-4088-a189-04233542d59f",
-                    "path": "<Keyboard>/v",
+                    "path": "<Keyboard>/s",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Player1",
@@ -101,7 +101,7 @@
                 {
                     "name": "",
                     "id": "57f11cf0-22a6-403c-a60d-7389e512c95f",
-                    "path": "<Keyboard>/p",
+                    "path": "<Keyboard>/downArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Player2",
