@@ -1,13 +1,25 @@
 fileFormatVersion: 2
-guid: 5e61744f75c28fd4393b099da9a8d659
+guid: c8546794780e19c40af8372ed5c6327c
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2954588953850277929
-    second: empty_bar_0
+      213: 8574789789634219215
+    second: Bob - idle_0
   - first:
-      213: 1191037823251355872
-    second: empty_bar_1
+      213: -3852260996433101912
+    second: Bob - idle_1
+  - first:
+      213: -5289675007363344887
+    second: Bob - idle_2
+  - first:
+      213: -6903996641295078337
+    second: Bob - idle_3
+  - first:
+      213: -119090510730952023
+    second: Bob - idle_4
+  - first:
+      213: 7759773469511421836
+    second: Bob - idle_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -52,8 +64,8 @@ TextureImporter:
   spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 0
-  spritePivot: {x: 0.5, y: 0.5}
+  alignment: 9
+  spritePivot: {x: 0.61556476, y: 0.5390903}
   spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
@@ -116,45 +128,133 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: empty_bar_0
+      name: Bob - idle_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 54
-        width: 98
-        height: 17
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1000
+        y: 691
+        width: 2465
+        height: 1346
+      alignment: 9
+      pivot: {x: 6.1884985, y: -1.5872434}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 920f98bdffec00920800000000000000
-      internalID: 2954588953850277929
+      spriteID: fcc4bcae1e5cff670800000000000000
+      internalID: 8574789789634219215
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: empty_bar_1
+      name: Bob - idle_1
       rect:
         serializedVersion: 2
-        x: 0
-        y: 34
-        width: 98
-        height: 18
+        x: 977
+        y: 1731
+        width: 24
+        height: 195
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0e893f0079a678010800000000000000
-      internalID: 1191037823251355872
+      spriteID: 8ab338da8050a8ac0800000000000000
+      internalID: -3852260996433101912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bob - idle_2
+      rect:
+        serializedVersion: 2
+        x: 999
+        y: 697
+        width: 2464
+        height: 1345
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90698d05b9c4796b0800000000000000
+      internalID: -5289675007363344887
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bob - idle_3
+      rect:
+        serializedVersion: 2
+        x: 253
+        y: 797
+        width: 84
+        height: 238
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3ced1932a31030a0800000000000000
+      internalID: -6903996641295078337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bob - idle_4
+      rect:
+        serializedVersion: 2
+        x: 319
+        y: 1035
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a203cbbfc7e85ef0800000000000000
+      internalID: -119090510730952023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bob - idle_5
+      rect:
+        serializedVersion: 2
+        x: 984
+        y: 42
+        width: 33
+        height: 35
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8f8ab38bd040bb60800000000000000
+      internalID: 7759773469511421836
       vertices: []
       indices: 
       edges: []
@@ -163,8 +263,8 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
-    internalID: 0
+    spriteID: 23efb53972e67f94abb2490a97844ce7
+    internalID: 1540834990
     vertices: []
     indices: 
     edges: []
@@ -173,8 +273,12 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      empty_bar_0: 2954588953850277929
-      empty_bar_1: 1191037823251355872
+      Bob - idle_0: 8574789789634219215
+      Bob - idle_1: -3852260996433101912
+      Bob - idle_2: -5289675007363344887
+      Bob - idle_3: -6903996641295078337
+      Bob - idle_4: -119090510730952023
+      Bob - idle_5: 7759773469511421836
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

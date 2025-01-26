@@ -6,6 +6,7 @@ namespace Whimsical.Gameplay.Player
     using System;
     using Debug;
     using UnityEngine.InputSystem;
+    using UnityEngine.Serialization;
 
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(PlayerInput))]
@@ -37,27 +38,49 @@ namespace Whimsical.Gameplay.Player
                                   && !_attackCooldownTimer.IsRunning
                                   && !_parryDurationTimer.IsRunning;
         private bool IsAttacking => _attackDurationTimer.IsRunning;
-        private bool IsLookingRight => !_spriteRenderer.flipX;
+        private bool IsLookingRight => _spriteRenderer.flipX;
 
         private Timer _parryDurationTimer;
         private Timer _parryCooldownTimer;
         private bool IsParrying => _parryDurationTimer.IsRunning;
         private bool CanParry => !IsParrying && !IsAttacking && !_parryCooldownTimer.IsRunning;
 
+        [Header("Audio settings")]
+        [SerializeField] 
+        private AudioSource _audio;
+        [SerializeField]
+        private AudioClip _attackClip;
+        [SerializeField]
+        private AudioClip _parryClip;
+
+        [Header("Sprite settings")]
+        [SerializeField] private Sprite _idleSprite;
+        [SerializeField] private Sprite _attackSprite;
+        [SerializeField] private Sprite _parrySprite;
+
+        public bool IsDead => _healthPoints.CurrentHealth <= 0;
+
+        private BoxCollider2D _collider;
+
         private bool IsGrounded
         {
             get
             {
-                var spriteCenter = new Vector2(_spriteRenderer.transform.position.x, _spriteRenderer.transform.position.y);
-                var hit = Physics2D.BoxCast(spriteCenter, _spriteRenderer.size / 2, 0, Vector2.down);
+                var colliderCenter = new Vector2(_collider.transform.position.x, _collider.transform.position.y);
+                var hit = Physics2D.BoxCast(colliderCenter, _collider.size / 4, 0, Vector2.down);
 
                 if (!hit)
                     return false;
                 
-                var spriteBottomCenter = new Vector2(_spriteRenderer.transform.position.x, _spriteRenderer.bounds.min.y);
-
-                var minDistanceToJump = _stats.JumpingDistance + (spriteCenter - spriteBottomCenter).magnitude;
-                return hit.distance <= minDistanceToJump;
+                DebugExtensions.Log($"Hit {hit.collider.gameObject.name}");
+                
+                var colliderBottomCenter = new Vector2(_collider.transform.position.x, _collider.bounds.min.y);
+                var maxDistanceToJump = _stats.JumpingDistance + (colliderCenter - colliderBottomCenter).magnitude;
+                
+                DebugExtensions.Log($"Current distance: {hit.distance}");
+                DebugExtensions.Log($"Max distance: {maxDistanceToJump}");
+                
+                return hit.distance <= maxDistanceToJump;
             }
         }
         
@@ -99,6 +122,7 @@ namespace Whimsical.Gameplay.Player
             _input = this.GetComponent<PlayerInput>();
             _spriteRenderer = this.GetComponent<SpriteRenderer>();
             _attackHitBoxCollider = _attackHitBox.GetComponent<BoxCollider2D>();
+            _collider = this.GetComponent<BoxCollider2D>();
             
             // Initializing input
             _jumpInput = _input.actions.FindAction(JumpInput);
@@ -114,11 +138,15 @@ namespace Whimsical.Gameplay.Player
                 DebugExtensions.Log("Attack duration finished");
                 _attackHitBoxCollider.enabled = false;
                 _attackCooldownTimer.RestartTimer();
+
+                _spriteRenderer.sprite = _idleSprite;
             };
+            _attackDurationTimer.UseUnscaledDeltaTime = false;
 
             _attackCooldownTimer = gameObject.AddComponent<Timer>();
             _attackCooldownTimer.TargetTime = _stats.AttackCooldown;
             _attackCooldownTimer.OnTimeElapsed += () => DebugExtensions.Log($"You can attack again");
+            _attackCooldownTimer.UseUnscaledDeltaTime = false;
 
             _currentColor = _spriteRenderer.color;
             _parryDurationTimer = gameObject.AddComponent<Timer>();
@@ -126,11 +154,13 @@ namespace Whimsical.Gameplay.Player
             _parryDurationTimer.OnTimeElapsed += () =>
             {
                 _parryCooldownTimer.RestartTimer();
-                _spriteRenderer.color = _currentColor;
+                _spriteRenderer.sprite = _idleSprite;
             };
+            _parryDurationTimer.UseUnscaledDeltaTime = false;
             
             _parryCooldownTimer = gameObject.AddComponent<Timer>();
             _parryCooldownTimer.TargetTime = _stats.ParryCooldown;
+            _parryCooldownTimer.UseUnscaledDeltaTime = false;
             
             // Making sure all players can use the same keyboard
             _input.SwitchCurrentControlScheme(_input.defaultControlScheme, Keyboard.current);
@@ -156,7 +186,7 @@ namespace Whimsical.Gameplay.Player
             
             var isMoving = movement != 0.0f;
             if (isMoving && !IsAttacking)
-                _spriteRenderer.flipX = movement < 0;
+                _spriteRenderer.flipX = movement > 0;
 
             if (_jumpInput.WasPressedThisFrame() && IsGrounded)
                 this.Jump();
@@ -179,6 +209,8 @@ namespace Whimsical.Gameplay.Player
             DebugExtensions.Log("Attacking");
             _attackHitBoxCollider.enabled = true;
             this._attackDurationTimer.RestartTimer();
+            _spriteRenderer.sprite = _attackSprite;
+            _audio.PlayOneShot(_attackClip);
         }
 
         private void Parry()
@@ -186,7 +218,7 @@ namespace Whimsical.Gameplay.Player
             if (!this.CanParry) return;
             DebugExtensions.Log("Parrying");
             _parryDurationTimer.RestartTimer();
-            _spriteRenderer.color = _parryColor;
+            _spriteRenderer.sprite = _parrySprite;
         }
 
         private void OnTriggerEnter2D(Collider2D other)
@@ -197,12 +229,20 @@ namespace Whimsical.Gameplay.Player
             
             _attackHitAction?.Invoke(this._attackHitBoxCollider.transform.position);
             damageable.ReceiveDamage(1);
+
+            // knock back
+            var otherRigibBody = other.gameObject.GetComponent<Rigidbody2D>();
+            var knockDirection = other.transform.position - this.transform.position;
+            knockDirection.Normalize();
+            
+            otherRigibBody.AddForce(knockDirection * 500, ForceMode2D.Impulse);
         }
 
         public void ReceiveDamage(int damage)
         {
             if (_parryDurationTimer.IsRunning)
             {
+                _audio.PlayOneShot(_parryClip);
                 _parryAction?.Invoke();
                 return;
             }
